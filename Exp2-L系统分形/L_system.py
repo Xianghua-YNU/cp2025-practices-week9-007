@@ -1,123 +1,91 @@
-"""
-L-System分形生成与绘图
-
-"""
 import matplotlib.pyplot as plt
 import math
 
-def generate_lsystem(axiom, productions, generations):
+def apply_rules(axiom, rules, iterations):
     """
-    L系统字符串生成器
-    :param axiom: 初始公理字符串
-    :param productions: 产生式规则字典
-    :param generations: 迭代次数
-    :return: 生成后的字符串
+    L-System string generator
+    :param axiom: Initial string
+    :param rules: Dictionary, symbol rewriting rules
+    :param iterations: Number of iterations
+    :return: Generated string after iterations
     """
     current = axiom
-    for _ in range(generations):
-        next_gen = []
-        for symbol in current:
-            next_gen.append(productions.get(symbol, symbol))
-        current = ''.join(next_gen)
+    for _ in range(iterations):
+        next_seq = []
+        for c in current:
+            next_seq.append(rules.get(c, c))
+        current = ''.join(next_seq)
     return current
 
-def render_lsystem(commands, turn_angle, move_step, 
-                  start_point=(0,0), heading=90, 
-                  is_tree=False, output_file=None):
+def draw_l_system(commands, angle_deg, step, initial_pos=(0, 0), initial_angle=90, tree_mode=False, savefile=None):
     """
-    L系统绘图器
-    :param commands: 指令字符串
-    :param turn_angle: 转向角度（度）
-    :param move_step: 移动步长
-    :param start_point: 起始坐标
-    :param heading: 初始朝向（0向右，90向上）
-    :param is_tree: 是否绘制分形树模式
-    :param output_file: 输出文件名
+    L-System plotter
+    :param commands: Command string
+    :param angle_deg: Angle to turn each time
+    :param step: Step length
+    :param initial_pos: Initial position
+    :param initial_angle: Initial direction (degrees)
+    :param tree_mode: Whether to use fractal tree mode (affects behavior of [ and ])
+    :param savefile: If specified, save the plot to this file
     """
-    # 设置非交互式后端（解决Spyder显示问题）
-    plt.switch_backend('agg')
-    
-    x, y = start_point
-    current_heading = heading
-    state_stack = []
-    
-    # 初始化画布
-    fig = plt.figure(figsize=(7, 7) if is_tree else (10, 3))
-    ax = fig.add_subplot(111)
+    x, y = initial_pos
+    current_angle = initial_angle
+    stack = []
+    fig, ax = plt.subplots()
+    for cmd in commands:
+        if cmd in ('F', '0', '1'):
+            nx = x + step * math.cos(math.radians(current_angle))
+            ny = y + step * math.sin(math.radians(current_angle))
+            ax.plot([x, nx], [y, ny], color='green' if tree_mode else 'blue', linewidth=1.2 if tree_mode else 1)
+            x, y = nx, ny
+        elif cmd == 'f':
+            x += step * math.cos(math.radians(current_angle))
+            y += step * math.sin(math.radians(current_angle))
+        elif cmd == '+':
+            current_angle += angle_deg
+        elif cmd == '-':
+            current_angle -= angle_deg
+        elif cmd == '[':
+            stack.append((x, y, current_angle))
+            if tree_mode:
+                current_angle += angle_deg
+        elif cmd == ']':
+            x, y, current_angle = stack.pop()
+            if tree_mode:
+                current_angle -= angle_deg
     ax.set_aspect('equal')
     ax.axis('off')
-    
-    # 解析指令
-    for char in commands:
-        if char in {'F', '0', '1'}:
-            dx = move_step * math.cos(math.radians(current_heading))
-            dy = move_step * math.sin(math.radians(current_heading))
-            ax.plot([x, x+dx], [y, y+dy], 
-                    color='#2E8B57' if is_tree else '#1E90FF',
-                    linewidth=1.5 if is_tree else 1)
-            x += dx
-            y += dy
-        elif char == '+':
-            current_heading += turn_angle
-        elif char == '-':
-            current_heading -= turn_angle
-        elif char == '[':
-            state_stack.append((x, y, current_heading))
-            if is_tree:
-                current_heading += turn_angle  # 左转分支
-        elif char == ']':
-            if state_stack:
-                x, y, current_heading = state_stack.pop()
-                if is_tree:
-                    current_heading -= turn_angle  # 右转返回
-    
-    # 输出处理
-    if output_file:
-        plt.savefig(output_file, bbox_inches='tight', dpi=120)
-        plt.close(fig)
+    if savefile:
+        plt.savefig(savefile, bbox_inches='tight', pad_inches=0.1, dpi=150)
+        plt.close()
     else:
         plt.show()
 
 if __name__ == "__main__":
-    # 科赫曲线配置
-    koch_config = {
-        "axiom": "F",
-        "rules": {"F": "F+F--F+F"},
-        "iterations": 4,
-        "angle": 60,
-        "step": 5,
-        "start_angle": 0
-    }
-    
-    # 分形树配置
-    tree_config = {
-        "axiom": "0",
-        "rules": {"1": "11", "0": "1[0]0"},
-        "iterations": 7,
-        "angle": 45,
-        "step": 7,
-        "start_angle": 90
-    }
-    
-    # 生成科赫曲线
-    koch_commands = generate_lsystem(koch_config["axiom"], 
-                                    koch_config["rules"], 
-                                    koch_config["iterations"])
-    render_lsystem(koch_commands, 
-                  koch_config["angle"], 
-                  koch_config["step"],
-                  start_point=(0, 0),
-                  heading=koch_config["start_angle"],
-                  output_file="koch_curve.png")
-    
-    # 生成分形树
-    tree_commands = generate_lsystem(tree_config["axiom"], 
-                                    tree_config["rules"], 
-                                    tree_config["iterations"])
-    render_lsystem(tree_commands, 
-                  tree_config["angle"], 
-                  tree_config["step"],
-                  start_point=(0, 0),
-                  heading=tree_config["start_angle"],
-                  is_tree=True,
-                  output_file="fractal_tree.png")
+    # Koch curve parameters
+    koch_axiom = "F"
+    koch_rules = {'F': 'F+F--F+F'}
+    koch_angle = 60
+    koch_iter = 4
+    koch_step = 5
+    koch_cmds = apply_rules(koch_axiom, koch_rules, koch_iter)
+    plt.figure(figsize=(10, 3))
+    draw_l_system(koch_cmds, koch_angle, koch_step, initial_pos=(0, 0), initial_angle=0)
+    plt.title("L-System Koch Curve")
+    plt.axis('equal')
+    plt.axis('off')
+    plt.show()
+
+    # Fractal tree parameters
+    tree_axiom = "0"
+    tree_rules = {'1': '11', '0': '1[0]0'}
+    tree_angle = 45
+    tree_iter = 7
+    tree_step = 7
+    tree_cmds = apply_rules(tree_axiom, tree_rules, tree_iter)
+    plt.figure(figsize=(7, 7))
+    draw_l_system(tree_cmds, tree_angle, tree_step, initial_pos=(0, 0), initial_angle=90, tree_mode=True)
+    plt.title("L-System Fractal Tree")
+    plt.axis('equal')
+    plt.axis('off')
+    plt.show()
