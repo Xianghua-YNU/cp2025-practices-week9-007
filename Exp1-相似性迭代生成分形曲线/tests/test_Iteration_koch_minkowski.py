@@ -1,42 +1,62 @@
 import numpy as np
-import sys
-import os
-from pathlib import Path
-import unittest
+import matplotlib.pyplot as plt
 
-# 添加父目录到路径，以便导入学生代码
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-#from solution.Iteration_koch_minkowski_solution import koch_generator, minkowski_generator
-from Iteration_koch_minkowski import koch_generator, minkowski_generator
+def koch_generator(u, level):
+    """
+    递归/迭代生成科赫曲线的点序列。
 
-class TestFractalCurves(unittest.TestCase):
-    def test_koch_generator_level1(self):
-        import numpy as np
-        u = np.array([0, 1])
-        points = koch_generator(u, 1)
-        self.assertIsInstance(points, np.ndarray)
-        self.assertEqual(len(points), 5)
+    参数:
+        u: 初始线段的端点数组（复数表示）
+        level: 迭代层数
 
-    def test_koch_generator_level2(self):
-        import numpy as np
-        u = np.array([0, 1])
-        points = koch_generator(u, 2)
-        self.assertIsInstance(points, np.ndarray)
-        self.assertEqual(len(points), 20)  # 修改为20
+    返回:
+        numpy.ndarray: 生成的所有点（复数数组）
+    """
+    # TODO: 实现科赫曲线生成算法
+    pass
 
-    def test_minkowski_generator_level1(self):
-        import numpy as np
-        u = np.array([0, 1])
-        points = minkowski_generator(u, 1)
-        self.assertIsInstance(points, np.ndarray)
-        self.assertEqual(len(points), 10)
+def minkowski_generator(u, level):
+    """
+    递归/迭代生成闵可夫斯基香肠曲线的点序列。
 
-    def test_minkowski_generator_level2(self):
-        import numpy as np
-        u = np.array([0, 1])
-        points = minkowski_generator(u, 2)
-        self.assertIsInstance(points, np.ndarray)
-        self.assertEqual(len(points), 90)  # 修改为90
+    参数:
+        u: 初始线段的端点数组（复数表示）
+        level: 迭代层数
+
+    返回:
+        numpy.ndarray: 生成的所有点（复数数组）
+    """
+    # TODO: 实现闵可夫斯基香肠曲线生成算法
+    pass
 
 if __name__ == "__main__":
-    unittest.main()
+    # 初始线段
+    init_u = np.array([0, 1])
+
+    # 绘制不同层级的科赫曲线
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    for i in range(4):
+        # TODO: 调用koch_generator生成点
+        koch_points = None  # 替换为实际生成的点
+        axs[i//2, i%2].plot(
+            np.real(koch_points), np.imag(koch_points), 'k-', lw=1
+        )
+        axs[i//2, i%2].set_title(f"Koch Curve Level {i+1}")
+        axs[i//2, i%2].axis('equal')
+        axs[i//2, i%2].axis('off')
+    plt.tight_layout()
+    plt.show()
+
+    # 绘制不同层级的闵可夫斯基香肠曲线
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    for i in range(4):
+        # TODO: 调用minkowski_generator生成点
+        minkowski_points = None  # 替换为实际生成的点
+        axs[i//2, i%2].plot(
+            np.real(minkowski_points), np.imag(minkowski_points), 'k-', lw=1
+        )
+        axs[i//2, i%2].set_title(f"Minkowski Sausage Level {i+1}")
+        axs[i//2, i%2].axis('equal')
+        axs[i//2, i%2].axis('off')
+    plt.tight_layout()
+    plt.show()
