@@ -22,19 +22,22 @@ def generate_mandelbrot(width=800, height=800, max_iter=100):
     # TODO: 创建x和y的线性空间
     # TODO: 使用np.meshgrid生成网格
     # TODO: 构建复数矩阵C = x + iy
-    
+    x = np.linspace(-2,1,width)
+    y = np.linspace(-1.5,1.5,height)
+    Re,Im = np.meshgrid(x,y)
+    C = Re + 1j*Im   
     # TODO: 初始化记录数组
     # B = np.zeros(...)  # 记录迭代次数
     # Z = np.zeros(...)  # 初始值设为0
-    
+    Z = np.zeros(C.shape,dtype=np.complex128)      #Z的初始值为零
+    B = np.zeros(C.shape)               #记录迭代次数 
     # TODO: 迭代计算
-    # for j in range(max_iter):
-    #     mask = np.abs(Z) <= 2
-    #     B += mask
-    #     Z[mask] = Z[mask]**2 + C[mask]
-    
+    for j in range(max_iter):
+        mask = np.abs(Z) <= 2
+        B += mask
+        Z[mask] = Z[mask]**2 + C[mask]
     # TODO: 返回转置后的结果
-    pass
+    return B.T
 
 def generate_julia(c, width=800, height=800, max_iter=100):
     """
@@ -54,19 +57,23 @@ def generate_julia(c, width=800, height=800, max_iter=100):
     # TODO: 创建x和y的线性空间
     # TODO: 使用np.meshgrid生成网格
     # TODO: 构建复数矩阵Z0 = x + iy
-    
+    x = np.linspace(-2,2,width)
+    y = np.linspace(-2,2,height)
+    Re,Im = np.meshgrid(x,y)
+    Z0 = Re + 1j*Im
     # TODO: 初始化记录数组
     # B = np.zeros(...)  # 记录迭代次数
     # Z = Z0.copy()  # 初始值为网格点
-    
+    Z = Z0.copy()
+    B = np.zeros(Z0.shape)         
     # TODO: 迭代计算
-    # for j in range(max_iter):
-    #     mask = np.abs(Z) <= 2
-    #     B += mask
-    #     Z[mask] = Z[mask]**2 + c
+    for j in range(max_iter):
+        mask = np.abs(Z) <= 2
+        B += mask
+        Z[mask] = Z[mask]**2 + c
     
     # TODO: 返回转置后的结果
-    pass
+    return B.T
 
 def plot_fractal(data, title, filename=None, cmap='magma'):
     """
